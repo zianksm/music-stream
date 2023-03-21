@@ -1,6 +1,6 @@
 [workspace]
 
 members = [
-    "db",
+    "database",
     "driver"
 ]
