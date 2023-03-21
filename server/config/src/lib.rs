@@ -1,7 +1,3 @@
-// pub fn add(left: usize, right: usize) -> usize {
-//     left + right
-// }
-
 pub struct ServerConfig {
     db_url: String,
 }
