@@ -13,9 +13,12 @@ pub enum Protocol {
 impl Protocol {
     pub fn infer(val: &Value, ctx: &ProtocolContext) -> Result<Protocol, anyhow::Error> {
         let spec = ctx.spec.to_lowercase();
+        let cmp = "stream";
+
+        println!("{}", cmp.eq(spec.as_str()));
 
         match spec.as_str() {
-            "stream" => Self::handle_stream_creation(val),
+            cmp => Self::handle_stream_creation(val),
             _ => Err(ErrorAdapter::make(format!(
                 "invalid spec command, got : {}",
                 spec
@@ -80,7 +83,7 @@ impl StreamContext {
 pub struct ContextMapper;
 
 impl ContextMapper {
-   pub fn map(value: &Value) -> Result<Protocol, anyhow::Error> {
+    pub fn map(value: &Value) -> Result<Protocol, anyhow::Error> {
         let ctx = ProtocolContext::new(&value)?;
         let protocol = Protocol::infer(&value, &ctx)?;
 
@@ -93,5 +96,24 @@ pub struct ErrorAdapter;
 impl ErrorAdapter {
     fn make<T: ToString>(err: T) -> anyhow::Error {
         anyhow!("{}", err.to_string())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_should_map_protocols() {
+        let json = "
+        {
+         \"spec\":\"stream\",
+         \"name\": \"yume no tsuzuki\"   
+        }
+        ";
+
+        let json = serde_json::from_str::<Value>(&json).unwrap();
+        let result = ContextMapper::map(&json).unwrap();
+        assert!(result.is_stream());
     }
 }
