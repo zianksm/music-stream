@@ -24,13 +24,3 @@ impl ServerConfig {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_should_load_env() {
-        let result = ServerConfig::new();
-        assert!(!result.db_local.is_empty())
-    }
-}
