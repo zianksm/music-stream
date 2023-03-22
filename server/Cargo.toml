@@ -3,5 +3,5 @@
 members = [
     "database",
     "driver",
-    "config"
+    "config",
 ]
