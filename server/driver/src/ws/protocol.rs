@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use anyhow::anyhow;
 use serde::Deserialize;
 use serde_json::Value;
@@ -11,17 +9,21 @@ pub enum Protocol {
 }
 
 impl Protocol {
+
+        #![feature(string_remove_matches)]
     pub fn infer(val: &Value, ctx: &ProtocolContext) -> Result<Protocol, anyhow::Error> {
-        let spec = ctx.spec.to_lowercase();
-        let cmp = "stream";
+        
+        // TODO : handle "\""
 
-        println!("{}", cmp.eq(spec.as_str()));
-
-        match spec.as_str() {
-            cmp => Self::handle_stream_creation(val),
+        // remove "\""
+         ctx.spec.remove_matches("./");
+        
+        println!("{:?} ",spec);
+        match &ctx.spec {
+            "stream" => Self::handle_stream_creation(val),
             _ => Err(ErrorAdapter::make(format!(
                 "invalid spec command, got : {}",
-                spec
+                ctx.spec
             ))),
         }
     }
@@ -54,7 +56,7 @@ impl ProtocolContext {
 
         let spec = spec.to_string();
 
-        return Ok(Self { spec });
+        Ok(Self { spec })
     }
 }
 
@@ -72,7 +74,7 @@ impl StreamContext {
 
         let name = name.to_string();
 
-        return Ok(Self { name });
+        Ok(Self { name })
     }
 
     pub fn name(&self) -> &str {
@@ -84,8 +86,8 @@ pub struct ContextMapper;
 
 impl ContextMapper {
     pub fn map(value: &Value) -> Result<Protocol, anyhow::Error> {
-        let ctx = ProtocolContext::new(&value)?;
-        let protocol = Protocol::infer(&value, &ctx)?;
+        let ctx = ProtocolContext::new(value)?;
+        let protocol = Protocol::infer(value, &ctx)?;
 
         Ok(protocol)
     }
@@ -101,18 +103,21 @@ impl ErrorAdapter {
 
 #[cfg(test)]
 mod tests {
+    use serde_json::json;
+
     use super::*;
 
     #[test]
     fn it_should_map_protocols() {
-        let json = "
-        {
-         \"spec\":\"stream\",
-         \"name\": \"yume no tsuzuki\"   
-        }
-        ";
+        let json = json!(
+            {
+            
+             "spec":"stream",
+             "name": "yume"   
+            }
 
-        let json = serde_json::from_str::<Value>(&json).unwrap();
+        );
+
         let result = ContextMapper::map(&json).unwrap();
         assert!(result.is_stream());
     }

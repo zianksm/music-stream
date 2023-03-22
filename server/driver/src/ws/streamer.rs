@@ -1,7 +1,6 @@
-use actix::ContextFutureSpawner;
+
 use actix::{
-    fut, Actor, ActorContext, ActorFutureExt, AsyncContext, Handler, Message, StreamHandler,
-    WrapFuture,
+    Actor, ActorContext, ActorFutureExt, AsyncContext, Handler, Message, StreamHandler,
 };
 use actix_web_actors::ws;
 use serde_json::Value;
@@ -55,7 +54,7 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for Streamer {
             Ok(ws::Message::Ping(msg)) => ctx.pong(&msg),
             Ok(ws::Message::Binary(bin)) => ctx.binary(bin),
             Ok(ws::Message::Text(msg)) => Self::handle_msg(msg.to_string(), ctx),
-            Ok(ws::Message::Close(reason)) => ctx.stop(),
+            Ok(ws::Message::Close(_reason)) => ctx.stop(),
             _ => (),
         }
     }
@@ -68,8 +67,6 @@ impl Streamer {
             return;
         };
 
-        let msg = ContextMapper::map(&value).unwrap();
-        
-        return;
+        let _msg = ContextMapper::map(&value).unwrap();
     }
 }

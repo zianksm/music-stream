@@ -1,12 +1,12 @@
 use actix_web::{
-    web::{Bytes, BytesMut},
-    HttpResponse, HttpResponseBuilder, Responder,
+    web::{BytesMut},
+    HttpResponse, Responder,
 };
 use tokio::io::AsyncReadExt;
 
 pub async fn stream() -> impl Responder {
     let path = std::env::current_dir().unwrap().join("music").join("yume no tsuzuki.mp3");
-    println!("{}", path.display().to_string());
+    println!("{}", path.display());
     let file = tokio::fs::File::open(path)
         .await
         .unwrap();
