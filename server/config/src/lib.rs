@@ -18,6 +18,10 @@ impl ServerConfig {
     pub fn db_url(&self) -> &str {
         self.db_local.as_ref()
     }
+
+    pub fn db_test(&self) -> &str {
+        self.db_test.as_ref()
+    }
 }
 
 #[cfg(test)]
