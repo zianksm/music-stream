@@ -4,17 +4,20 @@ use actix::{
     WrapFuture,
 };
 use actix_web_actors::ws;
+use serde_json::Value;
 pub struct Streamer;
 
 #[derive(Message)]
 #[rtype(result = "()")]
 struct SimpleMessage(pub String);
 
+
 impl Handler<SimpleMessage> for Streamer {
     type Result = ();
 
     fn handle(&mut self, msg: SimpleMessage, ctx: &mut Self::Context) -> Self::Result {
-        ctx.text(msg.0)
+        let value = format!("msg received: {}", msg.0);
+        ctx.text(value)
     }
 }
 
@@ -49,9 +52,19 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for Streamer {
         match item {
             Ok(ws::Message::Ping(msg)) => ctx.pong(&msg),
             Ok(ws::Message::Binary(bin)) => ctx.binary(bin),
-            Ok(ws::Message::Text(msg)) => ctx.text(msg),
+            Ok(ws::Message::Text(msg)) => Self::handle_msg(msg.to_string(), ctx),
             Ok(ws::Message::Close(reason)) => ctx.stop(),
             _ => (),
         }
+    }
+}
+
+impl Streamer {
+    fn handle_msg(msg: String, ctx: &mut ws::WebsocketContext<Streamer>) {
+        let Ok(value) = serde_json::from_str::<Value>(&msg) else{
+            ctx.address().do_send(SimpleMessage (msg));
+            return;
+        };
+        return;
     }
 }
