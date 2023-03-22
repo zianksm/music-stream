@@ -5,6 +5,8 @@ use actix::{
 };
 use actix_web_actors::ws;
 use serde_json::Value;
+
+use super::protocol::ContextMapper;
 pub struct Streamer;
 
 #[derive(Message)]
@@ -65,6 +67,9 @@ impl Streamer {
             ctx.address().do_send(SimpleMessage (msg));
             return;
         };
+
+        let msg = ContextMapper::map(&value).unwrap();
+        
         return;
     }
 }
