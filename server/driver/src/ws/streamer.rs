@@ -5,7 +5,8 @@ use actix::{
 use actix_web_actors::ws;
 use serde_json::Value;
 
-use super::protocol::ContextMapper;
+use super::protocols::contexts::mapper::ContextMapper;
+
 pub struct Streamer;
 
 #[derive(Message)]

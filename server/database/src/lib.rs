@@ -1,5 +1,5 @@
 use config::ServerConfig;
-use sqlx::{mysql, pool::PoolOptions, MySql, Pool};
+use sqlx::{mysql, MySql, Pool};
 
 pub struct Database {
     config: ServerConfig,
