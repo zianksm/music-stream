@@ -1,18 +1,14 @@
-
-use actix::{
-    Actor, ActorContext, ActorFutureExt, AsyncContext, Handler, Message, StreamHandler,
-};
+use actix::{Actor, ActorContext, ActorFutureExt, AsyncContext, Handler, Message, StreamHandler};
 use actix_web_actors::ws;
 use serde_json::Value;
 
-use super::protocols::contexts::mapper::ContextMapper;
+use super::protocols::{contexts::mapper::ContextMapper, enums::ProtocolMessage};
 
 pub struct Streamer;
 
 #[derive(Message)]
 #[rtype(result = "()")]
 struct SimpleMessage(pub String);
-
 
 impl Handler<SimpleMessage> for Streamer {
     type Result = ();
@@ -49,7 +45,7 @@ impl Actor for Streamer {
 
 impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for Streamer {
     fn handle(&mut self, item: Result<ws::Message, ws::ProtocolError>, ctx: &mut Self::Context) {
-        print!("msg received: {:?}", item);
+        println!("testt msg received: {:?}", item);
 
         match item {
             Ok(ws::Message::Ping(msg)) => ctx.pong(&msg),
@@ -68,7 +64,12 @@ impl Streamer {
             return;
         };
 
-        let _msg = ContextMapper::map(&value).unwrap();
-        
+        //TODO : implement streams
+        let result = ContextMapper::map(&value).unwrap().execute().unwrap();
+
+        match result {
+            ProtocolMessage::Bytes(data) => ctx.binary(data),
+            ProtocolMessage::Text(data) => ctx.address().do_send(SimpleMessage(data)),
+        }
     }
 }
