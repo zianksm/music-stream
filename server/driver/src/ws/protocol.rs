@@ -30,7 +30,7 @@ impl Protocol {
     /// [`STREAM`]: Protocol::STREAM
     #[must_use]
     pub fn is_stream(&self) -> bool {
-        matches!(self, Self::STREAM(..))
+        matches!(self, Self::STREAM(..))                                           
     }
 }
 
