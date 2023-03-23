@@ -1,3 +1,6 @@
+use std::io::Read;
+
+use futures::sink::Buffer;
 use serde::Deserialize;
 use serde_json::Value;
 
@@ -20,7 +23,22 @@ impl StreamContext {
 
 impl ActionContext for StreamContext {
     fn exec(&self) -> Result<ProtocolMessage, anyhow::Error> {
-        todo!()
+        let path = std::env::current_dir()
+            .unwrap()
+            .join("music")
+            .join("yume no tsuzuki.mp3");
+
+        let file = std::fs::File::open(path).unwrap();
+        let len = file.metadata().unwrap().len() as usize;
+
+        let mut buffer: Vec<_> = Vec::with_capacity(len);
+        let mut reader = std::io::BufReader::new(file);
+
+        reader.read_to_end(&mut buffer);
+
+        let data = bytes::Bytes::from(buffer);
+        
+        Ok(ProtocolMessage::Bytes(data))
     }
 }
 
