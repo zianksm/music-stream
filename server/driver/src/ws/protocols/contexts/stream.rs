@@ -19,7 +19,7 @@ impl StreamContext {
 }
 
 impl ActionContext for StreamContext {
-     fn exec() -> Result<ProtocolMessage, anyhow::Error> {
+    fn exec(&self) -> Result<ProtocolMessage, anyhow::Error> {
         todo!()
     }
 }

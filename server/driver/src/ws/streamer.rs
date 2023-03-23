@@ -69,5 +69,6 @@ impl Streamer {
         };
 
         let _msg = ContextMapper::map(&value).unwrap();
+        
     }
 }

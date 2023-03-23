@@ -6,25 +6,7 @@ use super::{
     traits::{ActionContext, CreationContext, ResolveContext},
 };
 
-pub enum Protocol<T = StreamContext>
-where
-    T: ActionContext + CreationContext<T>,
-{
-    STREAM(T),
-}
-
-impl<T> Protocol<T>
-where
-    T: ActionContext + CreationContext<T>,
-{
-    /// Returns `true` if the protocol is [`STREAM`].
-    ///
-    /// [`STREAM`]: Protocol::STREAM
-    #[must_use]
-    pub fn is_stream(&self) -> bool {
-        matches!(self, Self::STREAM(..))
-    }
-}
+pub struct Protocol(Box<dyn ActionContext>);
 
 pub enum ProtocolMessage {
     Bytes(bytes::Bytes),
@@ -52,7 +34,7 @@ impl ProtocolMessage {
 impl Protocol {
     pub fn infer(val: &Value, ctx: &Spec) -> Result<Protocol, anyhow::Error> {
         match ctx {
-            x if StreamContext::is(ctx) => Ok(Self::STREAM(StreamContext::new(val)?)),
+            x if StreamContext::is(ctx) => Ok(Self(Box::new(StreamContext::new(val)?))),
             _ => Err(Self::err(ctx)),
         }
     }
@@ -60,7 +42,13 @@ impl Protocol {
     fn err(ctx: &Spec) -> anyhow::Error {
         let str = format!("invalid spec command, got : {}", ctx.spec());
         let err = ErrorAdapter::make(str);
-        
+
         err
+    }
+}
+
+impl Protocol {
+    pub fn execute(&self) -> Result<ProtocolMessage, anyhow::Error> {
+        self.0.exec()
     }
 }

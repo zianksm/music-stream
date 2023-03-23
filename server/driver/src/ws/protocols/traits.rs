@@ -3,7 +3,7 @@ use serde_json::Value;
 use super::{contexts::protocol_context::Spec, enums::ProtocolMessage};
 
 pub trait ActionContext {
-    fn exec() -> Result<ProtocolMessage, anyhow::Error>;
+    fn exec(&self) -> Result<ProtocolMessage, anyhow::Error>;
 }
 
 pub trait CreationContext<T: ActionContext> {
