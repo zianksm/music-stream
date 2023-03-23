@@ -9,18 +9,10 @@ pub enum Protocol {
 }
 
 impl Protocol {
-
-        #![feature(string_remove_matches)]
+    #![feature(string_remove_matches)]
     pub fn infer(val: &Value, ctx: &ProtocolContext) -> Result<Protocol, anyhow::Error> {
-        
-        // TODO : handle "\""
-
-        // remove "\""
-         ctx.spec.remove_matches("./");
-        
-        println!("{:?} ",spec);
-        match &ctx.spec {
-            "stream" => Self::handle_stream_creation(val),
+        match ctx.spec.to_lowercase().as_str() {
+            "stream" | "\"stream\"" => Self::handle_stream_creation(val),
             _ => Err(ErrorAdapter::make(format!(
                 "invalid spec command, got : {}",
                 ctx.spec
@@ -111,9 +103,9 @@ mod tests {
     fn it_should_map_protocols() {
         let json = json!(
             {
-            
+
              "spec":"stream",
-             "name": "yume"   
+             "name": "yume"
             }
 
         );
