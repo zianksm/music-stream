@@ -1,9 +1,9 @@
 use serde_json::Value;
 
 use super::{
-    contexts::{protocol_context::ProtocolContext, stream::StreamContext},
+    contexts::{protocol_context::Spec, stream::StreamContext},
     erorr::ErrorAdapter,
-    traits::{ActionContext, CreationContext},
+    traits::{ActionContext, CreationContext, ResolveContext},
 };
 
 pub enum Protocol<T = StreamContext>
@@ -50,18 +50,17 @@ impl ProtocolMessage {
 }
 
 impl Protocol {
-    pub fn infer(val: &Value, ctx: &ProtocolContext) -> Result<Protocol, anyhow::Error> {
-        match ctx.spec().to_lowercase().as_str() {
-            "stream" | "\"stream\"" => Self::handle_stream_creation(val),
-            _ => Err(ErrorAdapter::make(format!(
-                "invalid spec command, got : {}",
-                ctx.spec()
-            ))),
+    pub fn infer(val: &Value, ctx: &Spec) -> Result<Protocol, anyhow::Error> {
+        match ctx {
+            x if StreamContext::is(ctx) => Ok(Self::STREAM(StreamContext::new(val)?)),
+            _ => Err(Self::err(ctx)),
         }
     }
 
-    fn handle_stream_creation(val: &Value) -> Result<Protocol, anyhow::Error> {
-        let ctx = StreamContext::new(val)?;
-        Ok(Self::STREAM(ctx))
+    fn err(ctx: &Spec) -> anyhow::Error {
+        let str = format!("invalid spec command, got : {}", ctx.spec());
+        let err = ErrorAdapter::make(str);
+        
+        err
     }
 }

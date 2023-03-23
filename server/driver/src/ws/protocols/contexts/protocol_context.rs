@@ -4,11 +4,11 @@ use serde_json::Value;
 use crate::ws::protocols::erorr::ErrorAdapter;
 
 #[derive(Deserialize)]
-pub struct ProtocolContext {
+pub struct Spec {
     spec: String,
 }
 
-impl ProtocolContext {
+impl Spec {
     pub fn new(val: &Value) -> Result<Self, anyhow::Error> {
         let Some(spec) = val.get("spec") else { 
             let err = ErrorAdapter::make("invalid protocol spec, must specify a spec field");

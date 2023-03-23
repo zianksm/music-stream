@@ -4,7 +4,7 @@ use serde_json::Value;
 use crate::ws::protocols::{
     enums::ProtocolMessage,
     erorr::ErrorAdapter,
-    traits::{ActionContext, CreationContext},
+    traits::{ActionContext, CreationContext, ResolveContext},
 };
 
 #[derive(Deserialize)]
@@ -19,7 +19,7 @@ impl StreamContext {
 }
 
 impl ActionContext for StreamContext {
-    fn exec() -> Result<ProtocolMessage, anyhow::Error> {
+     fn exec() -> Result<ProtocolMessage, anyhow::Error> {
         todo!()
     }
 }
@@ -34,5 +34,14 @@ impl CreationContext<Self> for StreamContext {
         let name = name.to_string();
 
         Ok(Self { name })
+    }
+}
+
+impl ResolveContext for StreamContext {
+    fn is(ctx: &super::protocol_context::Spec) -> bool {
+        match ctx.spec().to_lowercase().as_str() {
+            "stream" | "\"stream\"" => true,
+            _ => false,
+        }
     }
 }
