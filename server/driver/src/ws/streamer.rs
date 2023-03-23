@@ -63,7 +63,7 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for Streamer {
 impl Streamer {
     fn handle_msg(msg: String, ctx: &mut ws::WebsocketContext<Streamer>) {
         let Ok(value) = serde_json::from_str::<Value>(&msg) else{
-            ctx.address().do_send(SimpleMessage (msg));
+            ctx.address().do_send(SimpleMessage(msg));
             return;
         };
 

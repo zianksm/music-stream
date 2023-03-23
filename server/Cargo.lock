@@ -585,6 +585,7 @@ dependencies = [
  "actix-web",
  "actix-web-actors",
  "anyhow",
+ "bytes",
  "config",
  "futures",
  "serde",
