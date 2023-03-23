@@ -9,3 +9,7 @@ pub trait ActionContext {
 pub trait CreationContext<T: ActionContext> {
     fn new(val: &Value) -> Result<T, anyhow::Error>;
 }
+
+pub trait ResolveContext{
+    fn is(val: &Value) -> bool; 
+}
