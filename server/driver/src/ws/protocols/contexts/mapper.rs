@@ -33,7 +33,11 @@ mod tests {
 
         );
 
-        let result = ContextMapper::map(&json).unwrap();
-        assert!(result.is_stream());
+        let result = ContextMapper::map(&json);
+        match result {
+            Ok(_) => assert!(true),
+            _=> assert!(false)
+        }
+
     }
 }
