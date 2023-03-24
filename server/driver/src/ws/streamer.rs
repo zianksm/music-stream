@@ -2,13 +2,16 @@ use actix::{Actor, ActorContext, ActorFutureExt, AsyncContext, Handler, Message,
 use actix_web_actors::ws;
 use serde_json::Value;
 
-use super::protocols::{contexts::mapper::ContextMapper, enums::ProtocolMessage};
+use super::{
+    message_handler::ProtocolMessageHandler,
+    protocols::{contexts::mapper::ContextMapper, enums::ProtocolMessage},
+};
 
 pub struct Streamer;
 
 #[derive(Message)]
 #[rtype(result = "()")]
-struct SimpleMessage(pub String);
+pub struct SimpleMessage(pub String);
 
 impl Handler<SimpleMessage> for Streamer {
     type Result = ();
@@ -67,9 +70,6 @@ impl Streamer {
         //TODO : implement streams
         let result = ContextMapper::map(&value).unwrap().execute().unwrap();
 
-        match result {
-            ProtocolMessage::Bytes(data) => ctx.binary(data),
-            ProtocolMessage::Text(data) => ctx.address().do_send(SimpleMessage(data)),
-        }
+        let _ = ProtocolMessageHandler::handle(result, ctx);
     }
 }
