@@ -1,11 +1,8 @@
 use actix::{Actor, ActorContext, ActorFutureExt, AsyncContext, Handler, Message, StreamHandler};
-use actix_web_actors::ws;
+use actix_web_actors::ws::{self, CloseReason};
 use serde_json::Value;
 
-use super::{
-    message_handler::ProtocolMessageHandler,
-    protocols::{contexts::mapper::ContextMapper},
-};
+use super::{message_handler::ProtocolMessageHandler, protocols::contexts::mapper::ContextMapper};
 
 pub struct Streamer;
 
@@ -36,27 +33,26 @@ impl Actor for Streamer {
 
     fn stopping(&mut self, ctx: &mut Self::Context) -> actix::Running {
         println!("stopping actor");
-
-        let msg = String::from("disconnected");
-        let msg = SimpleMessage(msg);
-
-        ctx.address().do_send(msg);
-
         actix::Running::Stop
     }
+
+
 }
 
 impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for Streamer {
     fn handle(&mut self, item: Result<ws::Message, ws::ProtocolError>, ctx: &mut Self::Context) {
-        println!("testt msg received: {:?}", item);
-
         match item {
             Ok(ws::Message::Ping(msg)) => ctx.pong(&msg),
             Ok(ws::Message::Binary(bin)) => ctx.binary(bin),
             Ok(ws::Message::Text(msg)) => Self::handle_msg(msg.to_string(), ctx),
-            Ok(ws::Message::Close(_reason)) => ctx.stop(),
+            Ok(ws::Message::Close(reason)) => Self::handle_stop(ctx, reason),
             _ => (),
         }
+    }
+
+    fn finished(&mut self, ctx: &mut Self::Context) {
+        // do nothing so that the connection can keep being alive
+        ()
     }
 }
 
@@ -71,5 +67,21 @@ impl Streamer {
         let result = ContextMapper::map(&value).unwrap().execute().unwrap();
 
         ProtocolMessageHandler::handle(result, ctx);
+    }
+
+    fn handle_stop(ctx: &mut ws::WebsocketContext<Streamer>, reason: Option<CloseReason>) {
+        println!(
+            "stopping actor because : {:?}",
+            reason
+                .unwrap()
+                .code
+        );
+
+        let msg = String::from("disconnected");
+        let msg = SimpleMessage(msg);
+
+        ctx.address().do_send(msg);
+
+        ctx.stop()
     }
 }

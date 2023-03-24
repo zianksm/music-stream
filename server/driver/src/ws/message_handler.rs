@@ -1,8 +1,11 @@
-use actix::AsyncContext;
+use std::time::Duration;
+
+use actix::{clock, AsyncContext};
+use actix_web::Either;
 use actix_web_actors::ws::{self, ProtocolError, WebsocketContext};
 use bytes::Bytes;
-use futures::task::Poll;
 use futures::Stream;
+use futures::{task::Poll, FutureExt};
 
 use super::{
     protocols::enums::ProtocolMessage,
@@ -14,10 +17,17 @@ pub struct ProtocolMessageHandler;
 pub struct StreamWrapper(pub Vec<u8>);
 
 impl Iterator for StreamWrapper {
-    type Item = u8;
+    type Item = Vec<u8>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.0.pop()
+        let size = 500 * 1024; // send 512 kb chunks of data
+
+        println!("{}", self.0.len());
+
+        match self.0.len() {
+            0 => None,
+            _ => Some(self.0.drain(0..size.min(self.0.len())).collect::<Vec<u8>>()),
+        }
     }
 }
 
@@ -26,13 +36,13 @@ impl Stream for StreamWrapper {
 
     fn poll_next(
         self: std::pin::Pin<&mut Self>,
-        _cx: &mut std::task::Context<'_>,
+        ctx: &mut std::task::Context<'_>,
     ) -> std::task::Poll<Option<Self::Item>> {
         let inner = self.get_mut();
 
         match inner.next() {
-            Some(item) => Poll::Ready(Some(Ok(ws::Message::Binary(Bytes::from(vec![item]))))),
-            _ => Poll::Ready(None),
+            Some(item) => Poll::Ready(Some(Ok(ws::Message::Binary(Bytes::from(item))))),
+            None => Poll::Ready(None),
         }
     }
 }
