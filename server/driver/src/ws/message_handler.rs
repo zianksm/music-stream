@@ -26,9 +26,9 @@ impl Stream for StreamWrapper {
 
     fn poll_next(
         self: std::pin::Pin<&mut Self>,
-        cx: &mut std::task::Context<'_>,
+        _cx: &mut std::task::Context<'_>,
     ) -> std::task::Poll<Option<Self::Item>> {
-        let mut inner = self.get_mut().into_iter();
+        let inner = self.get_mut();
 
         match inner.next() {
             Some(item) => Poll::Ready(Some(Ok(ws::Message::Binary(Bytes::from(vec![item]))))),

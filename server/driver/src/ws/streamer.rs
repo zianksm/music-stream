@@ -4,7 +4,7 @@ use serde_json::Value;
 
 use super::{
     message_handler::ProtocolMessageHandler,
-    protocols::{contexts::mapper::ContextMapper, enums::ProtocolMessage},
+    protocols::{contexts::mapper::ContextMapper},
 };
 
 pub struct Streamer;
@@ -70,6 +70,6 @@ impl Streamer {
         //TODO : implement streams
         let result = ContextMapper::map(&value).unwrap().execute().unwrap();
 
-        let _ = ProtocolMessageHandler::handle(result, ctx);
+        ProtocolMessageHandler::handle(result, ctx);
     }
 }

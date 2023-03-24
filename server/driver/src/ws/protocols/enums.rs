@@ -34,16 +34,16 @@ impl ProtocolMessage {
 impl Protocol {
     pub fn infer(val: &Value, ctx: &Spec) -> Result<Protocol, anyhow::Error> {
         match ctx {
-            x if StreamContext::is(ctx) => Ok(Self(Box::new(StreamContext::new(val)?))),
+            _x if StreamContext::is(ctx) => Ok(Self(Box::new(StreamContext::new(val)?))),
             _ => Err(Self::err(ctx)),
         }
     }
 
     fn err(ctx: &Spec) -> anyhow::Error {
         let str = format!("invalid spec command, got : {}", ctx.spec());
-        let err = ErrorAdapter::make(str);
+        
 
-        err
+        ErrorAdapter::make(str)
     }
 }
 
