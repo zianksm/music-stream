@@ -1,11 +1,11 @@
-use std::time::Duration;
 
-use actix::{clock, AsyncContext};
-use actix_web::Either;
+
+use actix::{AsyncContext};
+
 use actix_web_actors::ws::{self, ProtocolError, WebsocketContext};
 use bytes::Bytes;
 use futures::Stream;
-use futures::{task::Poll, FutureExt};
+use futures::{task::Poll};
 
 use super::{
     protocols::enums::ProtocolMessage,
@@ -36,7 +36,7 @@ impl Stream for StreamWrapper {
 
     fn poll_next(
         self: std::pin::Pin<&mut Self>,
-        ctx: &mut std::task::Context<'_>,
+        _ctx: &mut std::task::Context<'_>,
     ) -> std::task::Poll<Option<Self::Item>> {
         let inner = self.get_mut();
 

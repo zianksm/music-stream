@@ -31,7 +31,7 @@ impl Actor for Streamer {
         ctx.address().do_send(msg)
     }
 
-    fn stopping(&mut self, ctx: &mut Self::Context) -> actix::Running {
+    fn stopping(&mut self, _ctx: &mut Self::Context) -> actix::Running {
         println!("stopping actor");
         actix::Running::Stop
     }
@@ -50,9 +50,9 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for Streamer {
         }
     }
 
-    fn finished(&mut self, ctx: &mut Self::Context) {
+    fn finished(&mut self, _ctx: &mut Self::Context) {
         // do nothing so that the connection can keep being alive
-        ()
+        
     }
 }
 
